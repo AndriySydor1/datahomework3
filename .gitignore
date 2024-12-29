@@ -1,0 +1,19 @@
+# Python-specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+
+# Virtual environments
+venv/
+poetry.lock
+
+# Scrapy ignores
+*.log
+data/
+
+# OS-specific ignores
+.DS_Store
+Thumbs.db
