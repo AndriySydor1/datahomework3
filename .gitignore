@@ -12,7 +12,6 @@ poetry.lock
 
 # Scrapy ignores
 *.log
-data/
 
 # OS-specific ignores
 .DS_Store
