@@ -1,101 +1,125 @@
-from pymongo import MongoClient
 import os
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
-# Завантаження змінних середовища з .env
+# Завантаження змінних середовища
 load_dotenv()
-
-# Отримання URI з .env
-uri = os.getenv("MONGO_URI")
+MONGO_URI = os.getenv("MONGO_URI")
 
 # Підключення до MongoDB
-client = MongoClient(uri)
-db = client['cats_database']
-collection = db['cats']
-# Приклад роботи з базою даних
-print("Підключення встановлено!")
-
-# Створення (Create)
-def create_cat(name, age, features):
-    try:
-        cat = {"name": name, "age": age, "features": features}
-        result = collection.insert_one(cat)
-        print(f"Створено запис з ID: {result.inserted_id}")
-    except Exception as e:
-        print(f"Помилка при створенні запису: {e}")
+client = MongoClient(MONGO_URI)
+db = client["cats_database"]
+collection = db["cats"]
 
 # Читання (Read)
-def read_all_cats():
+def read_all_records():
+    """Виводить усі записи з колекції."""
     try:
-        cats = collection.find()
-        for cat in cats:
-            print(cat)
+        records = collection.find()
+        for record in records:
+            print(record)
     except Exception as e:
-        print(f"Помилка при читанні записів: {e}")
+        print(f"Помилка під час читання записів: {e}")
 
-def read_cat_by_name(name):
+def read_record_by_name():
+    """Виводить інформацію про кота за введеним ім'ям."""
     try:
-        cat = collection.find_one({"name": name})
-        if cat:
-            print(cat)
+        name = input("Введіть ім'я кота: ").strip()
+        record = collection.find_one({"name": name})
+        if record:
+            print(record)
         else:
-            print(f"Кіт з ім'ям {name} не знайдений.")
+            print(f"Кіт з ім'ям '{name}' не знайдений.")
     except Exception as e:
-        print(f"Помилка при пошуку кота: {e}")
+        print(f"Помилка під час пошуку запису: {e}")
 
 # Оновлення (Update)
-def update_cat_age(name, new_age):
+def update_age_by_name():
+    """Оновлює вік кота за введеним ім'ям."""
     try:
+        name = input("Введіть ім'я кота: ").strip()
+        new_age = int(input("Введіть новий вік: "))
         result = collection.update_one({"name": name}, {"$set": {"age": new_age}})
-        if result.matched_count:
-            print(f"Вік кота {name} оновлено.")
+        if result.modified_count > 0:
+            print(f"Вік кота '{name}' успішно оновлено.")
         else:
-            print(f"Кіт з ім'ям {name} не знайдений.")
+            print(f"Кіт з ім'ям '{name}' не знайдений.")
+    except ValueError:
+        print("Вік повинен бути числом.")
     except Exception as e:
-        print(f"Помилка при оновленні віку: {e}")
+        print(f"Помилка під час оновлення віку: {e}")
 
-def add_feature_to_cat(name, feature):
+def add_feature_by_name():
+    """Додає нову характеристику до списку features кота за введеним ім'ям."""
     try:
-        result = collection.update_one({"name": name}, {"$push": {"features": feature}})
-        if result.matched_count:
-            print(f"Характеристика '{feature}' додана до кота {name}.")
+        name = input("Введіть ім'я кота: ").strip()
+        new_feature = input("Введіть нову характеристику: ").strip()
+        result = collection.update_one({"name": name}, {"$push": {"features": new_feature}})
+        if result.modified_count > 0:
+            print(f"Характеристика додана коту '{name}'.")
         else:
-            print(f"Кіт з ім'ям {name} не знайдений.")
+            print(f"Кіт з ім'ям '{name}' не знайдений.")
     except Exception as e:
-        print(f"Помилка при додаванні характеристики: {e}")
+        print(f"Помилка під час додавання характеристики: {e}")
 
 # Видалення (Delete)
-def delete_cat_by_name(name):
+def delete_record_by_name():
+    """Видаляє запис з колекції за введеним ім'ям."""
     try:
+        name = input("Введіть ім'я кота для видалення: ").strip()
         result = collection.delete_one({"name": name})
-        if result.deleted_count:
-            print(f"Кіт з ім'ям {name} видалений.")
+        if result.deleted_count > 0:
+            print(f"Кіт з ім'ям '{name}' видалений.")
         else:
-            print(f"Кіт з ім'ям {name} не знайдений.")
+            print(f"Кіт з ім'ям '{name}' не знайдений.")
     except Exception as e:
-        print(f"Помилка при видаленні кота: {e}")
+        print(f"Помилка під час видалення запису: {e}")
 
-def delete_all_cats():
+def delete_all_records():
+    """Видаляє всі записи з колекції."""
     try:
-        result = collection.delete_many({})
-        print(f"Видалено {result.deleted_count} записів.")
+        confirm = input("Ви впевнені, що хочете видалити всі записи? (так/ні): ").strip().lower()
+        if confirm == "так":
+            result = collection.delete_many({})
+            print(f"Усі записи видалено. Видалено {result.deleted_count} записів.")
+        else:
+            print("Операцію скасовано.")
     except Exception as e:
-        print(f"Помилка при видаленні всіх записів: {e}")
+        print(f"Помилка під час видалення всіх записів: {e}")
 
-# Тестові виклики
+# Меню для виклику функцій
+def main():
+    while True:
+        print("\nМеню:")
+        print("1. Вивести всі записи")
+        print("2. Знайти запис за ім'ям")
+        print("3. Оновити вік за ім'ям")
+        print("4. Додати характеристику за ім'ям")
+        print("5. Видалити запис за ім'ям")
+        print("6. Видалити всі записи")
+        print("7. Вийти")
+
+        choice = input("Виберіть опцію: ").strip()
+
+        if choice == "1":
+            read_all_records()
+        elif choice == "2":
+            read_record_by_name()
+        elif choice == "3":
+            update_age_by_name()
+        elif choice == "4":
+            add_feature_by_name()
+        elif choice == "5":
+            delete_record_by_name()
+        elif choice == "6":
+            delete_all_records()
+        elif choice == "7":
+            print("Вихід із програми.")
+            break
+        else:
+            print("Невірний вибір. Спробуйте ще раз.")
+
 if __name__ == "__main__":
-    # Додати котів
-    create_cat("barsik", 3, ["ходить в капці", "дає себе гладити", "рудий"])
-    create_cat("murzik", 2, ["сірий", "веселий"])
+    main()
 
-    # Читання
-    read_all_cats()
-    read_cat_by_name("barsik")
-
-    # Оновлення
-    update_cat_age("barsik", 4)
-    add_feature_to_cat("barsik", "любить рибу")
-
-    # Видалення
-    delete_cat_by_name("murzik")
     
