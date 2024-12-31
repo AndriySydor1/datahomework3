@@ -36,8 +36,8 @@
    mongoimport --uri="<MONGO_URI>" --collection=cats --file=exported_cats.json --jsonArray  
    де <MONGO_URI> - ваш MongoDB URI.
 2. Створіть файл .env зі змінною:
-   MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/
-   де <username>, <password> та <cluster-url> - облікові дані MongoDB Atlas.
+   MONGO_URI=mongodb+srv://username:password@cluster-url/
+   де username, password та cluster-url - облікові дані MongoDB Atlas.
 3. Використання main.py
    Запустіть скрипт main.py, щоб виконувати CRUD-операції.
    python main.py
